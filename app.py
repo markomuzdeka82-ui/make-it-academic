@@ -73,7 +73,7 @@ if st.button("Make it Academic! 🚀", use_container_width=True):
             genai.configure(api_key=api_key)
             
             # Ako gemini-2.5-flash ili gemini-2.0-flash ne rade na tvom ključu, vrati na gemini-1.5-flash
-            model = genai.GenerativeModel("gemini-2.5-flash")
+            model = genai.GenerativeModel("gemini-1.5-flash")
 
             prompt = f"""
             Preoblikuj sljedeću tvrdnju u akademski stil na hrvatskom jeziku (Razina: {academic_level}).
