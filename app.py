@@ -25,6 +25,14 @@ academic_level = st.sidebar.radio(
     ["Standardni seminarski rad", "Znanstveni rad / Doktorat", "Kratka i sažeta forma"]
 )
 
+
+# --- OPTIMIZACIJA 1: cachiraj kreiranje modela, ne radi se iznova svaki put ---
+@st.cache_resource(show_spinner=False)
+def get_model(key: str):
+    genai.configure(api_key=key)
+    return genai.GenerativeModel("gemini-1.5-flash")
+
+
 st.write("⚡ **Instant primjeri (kliknite za brzi unos):**")
 col1, col2, col3 = st.columns(3)
 
@@ -51,33 +59,44 @@ if st.button("Make it Academic! 🚀", use_container_width=True):
         st.warning("Molimo unesite tekst ili kliknite na neki od instant primjera.")
     else:
         try:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            model = get_model(api_key)
 
             prompt = f"""
-            Djeluj kao vrhunski akademski mentor. 
-            Preoblikuj sljedeću misao na hrvatskom jeziku u akademski stil.
+Djeluj kao vrhunski akademski mentor.
+Preoblikuj sljedeću misao na hrvatskom jeziku u akademski stil.
+Razina stila: {academic_level}
+Ulazni tekst: {text_input}
 
-            Razina stila: {academic_level}
-            Ulazni tekst: {text_input}
+Struktura odgovora:
+**🤖 AI Uvid:** (Kratka analiza teze u 1 rečenici)
 
-            Struktura odgovora:
-            **🤖 AI Uvid:** (Kratka analiza teze u 1 rečenici)
+**1. Standardna opcija:**
+(Formalna akademska rečenica)
 
-            **1. Standardna opcija:**
-            (Formalna akademska rečenica)
+**2. Znanstveno-analitička opcija:**
+(Izrazito stručna rečenica s pasivnim oblicima)
 
-            **2. Znanstveno-analitička opcija:**
-            (Izrazito stručna rečenica s pasivnim oblicima)
+**3. Sažeta teza:**
+(Kratka i direktna rečenica za hipotezu)
+"""
 
-            **3. Sažeta teza:**
-            (Kratka i direktna rečenica za hipotezu)
-            """
+            st.markdown("---")
+
+            # --- OPTIMIZACIJA 2: streaming odgovora ---
+            # Tekst se prikazuje čim stigne prvi dio, umjesto čekanja
+            # da se generira cijeli odgovor. Ovo je najveća promjena
+            # za percepciju brzine.
+            placeholder = st.empty()
+            full_response = ""
 
             with st.spinner("Generiram akademske opcije..."):
-                response = model.generate_content(prompt)
-                st.markdown("---")
-                st.markdown(response.text)
+                response_stream = model.generate_content(prompt, stream=True)
+                for chunk in response_stream:
+                    if chunk.text:
+                        full_response += chunk.text
+                        placeholder.markdown(full_response + "▌")
+
+            placeholder.markdown(full_response)
 
         except Exception as e:
             st.error(f"Došlo je do pogreške: {e}")
