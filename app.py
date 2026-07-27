@@ -10,7 +10,7 @@ st.set_page_config(
 
 # Naslov i opis
 st.title("🎓 Make it Academic AI")
-st.write("Transformirajte ideje u besprijekoran akademski stil uz AI asistenciju u stvarnom vremenu.")
+st.write("Transformirajte ideje u besprijekoran akademski stil u sekundi.")
 
 # Dohvaćanje API ključa
 api_key = None
@@ -45,51 +45,49 @@ if col3.button("🤖 Umjetna inteligencija"):
 text_input = st.text_area(
     "Unesite rečenicu ili odaberite instant primjer iznad:",
     value=st.session_state["user_text"],
-    height=100,
-    key="main_input"
+    height=100
 )
-
-# Funkcija za generiranje i streaming
-def process_text(prompt_text):
-    if not api_key:
-        st.error("Molimo unesite API ključ u bočnom izborniku ili ga postavite u Streamlit Secrets.")
-        return
-
-    try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
-
-        system_prompt = f"""
-        Djeluj kao vrhunski akademski mentor i AI stručnjak za pisanje radova na hrvatskom jeziku.
-        Korisnik ti šalje neformalnu misao ili tvrdnju.
-        
-        Tvoj zadatak je odgovoriti u sljedećoj strukturi:
-        1. **Kratki AI uvid (Kao asistencijski komentar):** Analiziraj u jednoj do dvije rečenice što je ključni problem/teza u izjavi.
-        2. **Višestruke akademske opcije:**
-           - **Opcija 1 (Standardna):** Formalna akademska formulacija.
-           - **Opcija 2 (Znanstveno-analitička):** Izrazito stručna formulacija s pasivom i uzročno-posljedičnim konstrukcijama.
-           - **Opcija 3 (Sažeta teza):** Izravna, fokusirana rečenica idealna za hipotezu ili zaključak.
-        3. **Preporučeni stručni pojmovi:** Popis 3-4 ključna akademska pojma/vokabulara korištena u odgovoru.
-
-        Odabrana razina stila: {academic_level}
-        Ulazni tekst: '{prompt_text}'
-        """
-
-        with st.spinner("AI analizira i preoblikuje tekst..."):
-            response = model.generate_content(system_prompt, stream=True)
-            st.markdown("### 🤖 AI Odgovor i Preporuke")
-            st.write_stream(chunk.text for chunk in response)
-
-    except Exception as e:
-        st.error(f"Došlo je do pogreške: {e}")
 
 # Gumb za pokretanje
 if st.button("Make it Academic! 🚀", use_container_width=True):
-    if text_input.strip():
-        process_text(text_input)
-    else:
+    if not api_key:
+        st.error("Molimo unesite API ključ u bočnom izborniku ili ga postavite u Streamlit Secrets.")
+    elif not text_input.strip():
         st.warning("Molimo unesite tekst ili kliknite na neki od instant primjera.")
+    else:
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+
+            system_prompt = f"""
+            Djeluj kao vrhunski akademski mentor. 
+            Korisnik ti šalje neformalnu misao. Preoblikuj je na hrvatskom jeziku.
+
+            Struktura odgovora:
+            **🤖 AI Uvid:** (Kratka analiza teze u 1 rečenici)
+
+            **1. Standardna opcija:**
+            (Formalna akademska rečenica)
+
+            **2. Znanstveno-analitička opcija:**
+            (Izrazito stručna rečenica s pasivnim oblicima)
+
+            **3. Sažeta teza:**
+            (Kratka i direktna rečenica za hipotezu)
+
+            Razina stila: {academic_level}
+            Ulazni tekst: '{text_input}'
+            """
+
+            with st.spinner("Generiram u sekundi..."):
+                # Direktno generiranje bez st.write_stream izbjegava pauze i usporavanja
+                response = model.generate_content(system_prompt)
+                st.markdown("---")
+                st.markdown(response.text)
+
+        except Exception as e:
+            st.error(f"Došlo je do pogreške: {e}")
 
 # Podnožje
 st.markdown("---")
-st.caption("© 2026 Make it Academic. Sva prava pridržana.")
+st.caption("© 2026 Make it Academic. Sva prava pridržana.").")
