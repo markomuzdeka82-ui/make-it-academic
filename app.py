@@ -1,6 +1,10 @@
 import os
 import streamlit as st
 import google.generativeai as genai
+# Pokušaj prvo uzeti ključ iz Streamlit Secrets, a ako ga nema, provjeri sidebar
+api_key = st.secrets.get("GEMINI_API_KEY")
+if not api_key:
+    api_key = st.sidebar.tex_input("Unesite vaš Gemini API ključ:", type="password")
 
 # Config stranice
 st.set_page_config(page_title="Make it Academic", page_icon="🎓", layout="centered")
