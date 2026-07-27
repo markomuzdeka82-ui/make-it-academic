@@ -72,19 +72,19 @@ if st.button("Make it Academic! 🚀", use_container_width=True):
         try:
             genai.configure(api_key=api_key)
             
-            # Koristimo pouzdan i brz model
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            # Koristimo najnoviji i najbrži model gemini-2.0-flash
+            model = genai.GenerativeModel("gemini-2.0-flash")
 
             prompt = f"""
-            Djeluj kao pristupačan, pametan i stručan AI asistent (baš kao u ugodnom razgovoru s korisnikom).
-            Korisnik ti šalje neformalnu rečenicu, a ti mu odgovaraš izravno, podržavajuće i jasno na hrvatskom jeziku.
+            Djeluj kao pristupačan, pametan i stručan AI asistent.
+            Korisnik ti šalje neformalnu rečenicu, a ti mu odgovaraš izravno i odmah na hrvatskom jeziku.
 
             Formatiraj odgovor točno ovako:
 
             Bok! Evo kako možemo tvoju misao pretvoriti u akademski stil:
 
             💬 **Kratki AI uvid:**
-            (Napiši jednu do dvije rečenice analize o tome što je srž ove tvrdnje i na što treba pripaziti pri pisanju.)
+            (Napiši 1-2 rečenice analize teze)
 
             🎓 **Preporučene akademske opcije:**
 
@@ -92,23 +92,26 @@ if st.button("Make it Academic! 🚀", use_container_width=True):
             "(Umetni formalnu rečenicu)"
 
             * **Opcija B (Napredni znanstveni stil):**
-            "(Umetni rečenicu s pasivnim oblicima i stručnim vokabularom)"
+            "(Umetni rečenicu s pasivnim oblicima)"
 
             💡 **Ključni stručni pojmovi:**
-            (Navedi 3-4 stručne riječi ili fraze korištene u ovim opcijama)
+            (Navedi 3-4 stručna pojma)
 
             Odabrana razina stila: {academic_level}
             Uneseni tekst korisnika: '{text_input}'
             """
 
-            with st.spinner("Razmišljam i pripremam odgovor..."):
-                response = model.generate_content(prompt)
-                
-                if response.text:
-                    st.success("Ovo je moj prijedlog za tebe:")
-                    st.markdown(response.text)
-                else:
-                    st.error("Nažalost, nisam uspio generirati odgovor. Pokušaj ponovno.")
+            # Pripremamo prazan prostor na ekranu koji se puni ODMAH
+            response_container = st.empty()
+            
+            # Generiramo sa stream=True za trenutni ispis
+            response = model.generate_content(prompt, stream=True)
+            
+            full_text = ""
+            for chunk in response:
+                if chunk.text:
+                    full_text += chunk.text
+                    response_container.markdown(full_text)
 
         except Exception as e:
             st.error(f"Pojavila se greška: {e}")
