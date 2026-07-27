@@ -90,4 +90,4 @@ if st.button("Make it Academic! 🚀", use_container_width=True):
 
 # Podnožje
 st.markdown("---")
-st.caption("© 2026 Make it Academic. Sva prava pridržana.").")
+st.caption("© 2026 Make it Academic. Sva prava pridržana.")
