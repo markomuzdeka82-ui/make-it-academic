@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
 # Postavke stranice
 st.set_page_config(page_title="Make it Academic AI", page_icon="🎓", layout="centered")
@@ -45,7 +45,7 @@ with col1:
 with col2:
     st.markdown('<img src="https://cdn-icons-png.flaticon.com/512/3448/3448339.png" width="18"> <b>Prijevoz</b>', unsafe_allow_html=True)
     if st.button("Uredi tekst o prijevozu"):
-        st.session_state["user_text"] = "Besplatan javni prijevoz smanjuje gužve u gradovima."
+        st.session_state["user_text"] = "Besplatan javni prijevoz smanje gužve u gradovima."
 
 with col3:
     st.markdown('<img src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png" width="18"> <b>AI Tehnologija</b>', unsafe_allow_html=True)
@@ -70,10 +70,8 @@ if st.button("Make it Academic! 🚀", use_container_width=True):
         st.warning("Molimo unesite tekst ili odaberite neki od primjera.")
     else:
         try:
-            genai.configure(api_key=api_key)
-            
-            # Koristimo najnoviji i najbrži model gemini-2.0-flash
-            model = genai.GenerativeModel("gemini-2.0-flash")
+            # Pokretanje novog klijenta
+            client = genai.Client(api_key=api_key)
 
             prompt = f"""
             Djeluj kao pristupačan, pametan i stručan AI asistent.
@@ -101,13 +99,15 @@ if st.button("Make it Academic! 🚀", use_container_width=True):
             Uneseni tekst korisnika: '{text_input}'
             """
 
-            # Pripremamo prazan prostor na ekranu koji se puni ODMAH
             response_container = st.empty()
-            
-            # Generiramo sa stream=True za trenutni ispis
-            response = model.generate_content(prompt, stream=True)
-            
             full_text = ""
+
+            # Poziv s novim SDK-om koji munjevito ispisuje slovo po slovo
+            response = client.models.generate_content_stream(
+                model="gemini-2.5-flash",
+                contents=prompt,
+            )
+
             for chunk in response:
                 if chunk.text:
                     full_text += chunk.text
