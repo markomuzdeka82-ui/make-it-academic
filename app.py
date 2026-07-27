@@ -7,7 +7,7 @@ st.set_page_config(page_title="Make it Academic", page_icon="🎓")
 st.title("🎓 Make it Academic")
 st.write("Transformirajte svakodnevne misli u besprijekoran akademski stil.")
 
-# Provjera API ključa: prvo gleda Streamlit Secrets, a ako nema, gleda sidebar
+# Provjera API ključa
 api_key = None
 
 if "GEMINI_API_KEY" in st.secrets:
@@ -31,10 +31,15 @@ if st.button("Make it Academic! 🚀"):
             
             prompt = f"Preoblikuj sljedeću tvrdnju u formalni, akademski stil na hrvatskom jeziku. Zadrži izvorno značenje, ali koristi stručniji i akademski vokabular:\n\n'{text_input}'"
             
-            with st.spinner("Preoblikujem u akademski stil..."):
-                response = model.generate_content(prompt)
-                st.success("**Akademska verzija:**")
-                st.write(response.text)
+            # Prikazujemo natpis dok čeka
+            st.success("**Akademska verzija:**")
+            
+            # Generiramo tekst u stvarnom vremenu (stream=True)
+            response = model.generate_content(prompt, stream=True)
+            
+            # st.write_stream ispisuje riječ po riječ čim stignu od Googlea
+            st.write_stream(chunk.text for chunk in response)
+            
         except Exception as e:
             st.error(f"Došlo je do pogreške: {e}")
 
